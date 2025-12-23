@@ -431,3 +431,16 @@ body:not(.light) .loader-title,
 body:not(.light) #typingText {
   color: #ffffff;   /* 🔥 WHITE TEXT */
 }
+falcon-icon[src="https://i.ibb.co/gk3CkkV/IMG-20250918-195117-391.webp"] {
+  width: 32px;
+  height: 32px;
+}
+.view-counter {
+  margin-bottom: 26px; /* 🔥 yahan gap add */
+}
+.feed {
+  margin-top: 24px; /* 🔥 post aur counter ke beech gap */
+}
+.post {
+  margin-top: 6px;   /* multiple posts ke beech smooth gap */
+}
