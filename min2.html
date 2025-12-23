@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="admin.css">
+<link rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script type="module" src="admin.js"></script>
+</head>
+
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2>ADMIN</h2>
+    <button data-tab="profile">Profile</button>
+    <button data-tab="socials">Socials</button>
+    <button data-tab="navigation">Navigation</button>
+    <button data-tab="posts">Posts</button>
+    <button data-tab="visitors">Visitors</button>
+
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <div id="loader" class="loader hidden">Saving...</div>
+
+    <!-- PROFILE -->
+    <section id="profile" class="tab active">
+      <h3>Profile</h3>
+      <input id="profilePic" placeholder="Profile Image URL">
+      <input id="profileName" placeholder="Name">
+      <input id="profileSubtitle" placeholder="Subtitle">
+      <button id="saveProfile">Save</button>
+    </section>
+
+    <!-- SOCIALS -->
+    <section id="socials" class="tab">
+      <h3>Social Media</h3>
+
+      <input id="socialName" placeholder="Platform name (instagram)">
+      <input id="socialIcon" placeholder="FontAwesome icon (fa-instagram)">
+      <input id="socialUrl" placeholder="Profile URL">
+      <label><input type="checkbox" id="socialEnabled" checked> Enabled</label>
+      <button id="addSocial">Add Social</button>
+
+      <div id="socialList"></div>
+    </section>
+
+<!-- NAVIGATION -->
+<!-- NAVIGATION -->
+<section id="navigation" class="tab">
+  <h3>Navigation (URL Based)</h3>
+
+  <input id="navLabel" placeholder="Menu Label (Instagram, Home)">
+  <input id="navUrl" placeholder="Full URL (https://...)">
+
+  <label>
+    <input type="checkbox" id="navNewTab" checked>
+    Open in New Tab
+  </label>
+
+  <label>
+    <input type="checkbox" id="navEnabled" checked>
+    Enabled
+  </label>
+
+  <button id="addNav">Add Menu</button>
+
+  <div id="navList"></div>
+</section>
+<section id="visitors" class="tab">
+  <h3>Visitors</h3>
+
+  <button id="deleteAllVisitors" class="danger" style="margin-bottom:12px">
+    Delete All Visitors
+  </button>
+
+  <div id="visitorList"></div>
+</section>
+
+    <!-- POSTS -->
+    <section id="posts" class="tab">
+      <h3>Posts</h3>
+      <input id="postImage" placeholder="Image URL">
+      <input id="postCaption" placeholder="Caption">
+      <button id="addPost">Add Post</button>
+
+      <div id="postList"></div>
+    </section>
+
+  </main>
+
+</div>
+
+</body>
+</html>

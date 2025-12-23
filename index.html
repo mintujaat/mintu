@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mintu – Profile</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- CSS -->
+<link rel="stylesheet" href="style.css">
+
+<!-- Icons -->
+<link rel="stylesheet"
+ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<!-- IMPORTANT: MODULE SCRIPT -->
+<script type="module" src="app.js"></script>
+<script>
+if (localStorage.getItem("verified") !== "true") {
+  window.location.href = "verify.html";
+}
+</script>
+
+</head>
+
+<body class="light">
+
+<body class="light">
+<!-- LOADER -->
+<div id="loaderScreen">
+  <div class="loader-box">
+    <div class="loader-title">OFFICIAL WEBSITE</div>
+    <div id="typingText"></div>
+  </div>
+</div>
+
+
+<!-- rest of site -->
+
+<!-- THEME TOGGLE (LEFT) -->
+<div class="top-left">
+  <button id="themeToggle" aria-label="Toggle theme">
+    <i class="fa-solid fa-moon"></i>
+  </button>
+</div>
+
+<!-- MENU BUTTON (RIGHT) -->
+<div class="top-right">
+  <button id="menuBtn" class="hamburger" aria-label="Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</div>
+
+<!-- HAMBURGER MENU -->
+<nav id="menu" class="menu">
+  <!-- buttons Firebase se inject honge -->
+</nav>
+
+<main>
+
+<!-- ================= ABOUT / HOME ================= -->
+<section id="about" class="section active">
+
+  <!-- PROFILE -->
+  <div class="profile center">
+    <img class="avatar"
+         src="https://i.ibb.co/gk3CkkV/IMG-20250918-195117-391.webprfy"
+         alt="Profile">
+
+    <h1>Mintu</h1>
+    <p class="subtitle">IT • Developer</p>
+
+    <!-- SOCIAL ICONS (Firebase) -->
+    <div class="socials">
+      <!-- icons Firebase se inject honge -->
+    </div>
+  </div>
+<!-- VIEW COUNTERS -->
+<div class="view-counter">
+  <span id="todayViews">Today view : 0</span>
+  <span id="totalViews">Total view: 0</span>
+</div>
+
+  <!-- ================= FEED ================= -->
+  <section class="feed">
+    <!-- posts Firebase se inject honge -->
+  </section>
+
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section id="contact" class="section center">
+  <h2>Contact</h2>
+  <p>hello@example.com</p>
+</section>
+
+</main>
+
+</body>
+</html>

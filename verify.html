@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Verification</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+:root {
+  --bg: #ffffff;
+  --text: #000000;
+  --card: #f2f2f2;
+}
+
+body.dark {
+  --bg: #000000;
+  --text: #ffffff;
+  --card: #111111;
+}
+
+* {
+  box-sizing: border-box;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Card */
+.captcha-box {
+  background: var(--card);
+  padding: 28px 32px;
+  border-radius: 14px;
+  width: 320px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+.captcha-title {
+  font-size: 13px;
+  letter-spacing: 2px;
+  opacity: .6;
+  margin-bottom: 10px;
+}
+
+h2 {
+  margin: 0 0 16px;
+}
+
+.question {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  text-align: center;
+}
+
+button {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+  cursor: pointer;
+  background: #0d6efd;
+  color: #fff;
+  opacity: .5;
+}
+
+button.enabled {
+  opacity: 1;
+}
+
+.toggle {
+  margin-top: 12px;
+  font-size: 13px;
+  cursor: pointer;
+  opacity: .6;
+}
+</style>
+</head>
+
+<body class="light">
+
+<div class="captcha-box">
+  <div class="captcha-title">This Verification page made by Mintu</div>
+  <h2>Verify you’re human</h2>
+
+  <div class="question" id="question"></div>
+
+  <input id="answer" placeholder="Enter answer" />
+
+  <button id="verifyBtn">Verify</button>
+
+  <div class="toggle" id="themeToggle">Toggle theme</div>
+</div>
+
+<script>
+const qEl = document.getElementById("question");
+const ansEl = document.getElementById("answer");
+const btn = document.getElementById("verifyBtn");
+const themeToggle = document.getElementById("themeToggle");
+
+let a, b;
+
+function newCaptcha() {
+  a = Math.floor(Math.random() * 10) + 1;
+  b = Math.floor(Math.random() * 10) + 1;
+  qEl.innerText = `What is ${a} + ${b} ?`;
+  ansEl.value = "";
+  btn.classList.remove("enabled");
+}
+
+newCaptcha();
+
+ansEl.oninput = () => {
+  if (Number(ansEl.value) === a + b) {
+    btn.classList.add("enabled");
+  } else {
+    btn.classList.remove("enabled");
+  }
+};
+
+btn.onclick = () => {
+  if (!btn.classList.contains("enabled")) return;
+
+  // VERIFIED
+  localStorage.setItem("verified", "true");
+  window.location.href = "index.html"; // main site
+};
+
+themeToggle.onclick = () => {
+  document.body.classList.toggle("dark");
+};
+
+</script>
+
+</body>
+</html>

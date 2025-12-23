@@ -1,0 +1,433 @@
+/* ================= ROOT / THEME ================= */
+:root {
+  --bg: #0b0b0b;
+  --text: #ffffff;
+  --card: #1c1c1c;
+}
+
+body.light {
+  --bg: #ffffff;
+  --text: #000000;
+  --card: #eaeaea;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ================= TOP BUTTONS ================= */
+.top-left,
+.top-right {
+  position: fixed;
+  top: 15px;
+  z-index: 100;
+}
+
+.top-left { left: 15px; }
+.top-right { right: 15px; }
+
+.top-right button,
+.top-left button {
+  background: var(--card);
+  border: none;
+  color: var(--text);
+  padding: 10px;
+  border-radius: 8px;
+}
+
+/* ================= HAMBURGER ================= */
+.hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  margin: 4px 0;
+}
+
+/* ================= MENU ================= */
+nav {
+  position: fixed;
+  right: 20px;
+  top: 70px;
+  background: var(--card);
+  border-radius: 12px;
+  padding: 10px;
+  display: none;
+  flex-direction: column;
+}
+
+nav.show {
+  display: flex;
+}
+
+nav button {
+  background: none;
+  border: none;
+  color: var(--text);
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+/* ================= SECTIONS ================= */
+.section {
+  display: none;
+  padding: 80px 20px;
+  animation: fade 0.3s ease;
+}
+
+.section.active {
+  display: block;
+}
+
+.center {
+  text-align: center;
+}
+
+@keyframes fade {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; }
+}
+
+/* ================= PROFILE ================= */
+.profile {
+  margin-bottom: 32px;
+}
+
+.avatar {
+  width: 130px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.6);
+}
+
+h1 {
+  margin-top: 14px;
+  font-size: 32px;
+}
+
+.subtitle {
+  margin-top: 6px;
+  opacity: 0.6;
+}
+
+.socials {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.socials a {
+  font-size: 22px;
+  color: var(--text);
+}
+
+/* ================= FEED ================= */
+.feed {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* ================= POST ================= */
+.post {
+  background: var(--card);
+  border-radius: 14px;
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+
+/* IMAGE — 🔥 MAIN FIX */
+.post-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #000;
+}
+
+.post-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;   /* 🔥 IMPORTANT */
+  display: block;
+}
+
+/* CAPTION */
+.post-caption {
+  padding: 10px 14px;
+  font-size: 14px;
+  opacity: 0.9;
+  color: var(--text);
+  text-align: left;
+}
+
+/* ACTIONS */
+.post-actions {
+  padding: 8px 14px 14px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.post-actions button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.post-actions .count {
+  font-size: 14px;
+}
+
+.post-actions .liked {
+  color: red;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 600px) {
+  h1 { font-size: 28px; }
+  .avatar { width: 110px; }
+}
+/* ===== FAST TYPING LOADER ===== */
+#loaderScreen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#typingText {
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #e50914; /* Netflix red vibe */
+  font-family: monospace;
+}
+/* ===== PREMIUM TYPING LOADER ===== */
+#loaderScreen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loader-box {
+  border: 1px solid rgba(255,255,255,0.25);
+  padding: 26px 34px;
+  border-radius: 14px;
+  text-align: center;
+  min-width: 260px;
+}
+
+.loader-title {
+  font-size: 11px;
+  letter-spacing: 3px;
+  opacity: 0.6;
+  margin-bottom: 14px;
+}
+
+#typingText {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  font-family: monospace;
+  color: #ffffff;
+}
+/* ===== LOADER EXIT ANIMATION ===== */
+.loader-box.exit {
+  animation: loaderExit 0.4s ease forwards;
+}
+
+@keyframes loaderExit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+/* ================= SOCIAL ICONS (HIGHLIGHT + GLOW) ================= */
+
+.socials {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+
+.socials a {
+  position: relative;
+  font-size: 22px;
+  color: var(--text);
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+/* 🔥 Soft continuous glow */
+.socials a i {
+  animation: iconGlow 2.8s ease-in-out infinite;
+}
+
+/* Hover effect */
+.socials a:hover {
+  transform: scale(1.15);
+}
+
+.socials a:hover i {
+  color: #ffffff;
+  animation-play-state: paused; /* hover pe stable */
+  text-shadow:
+    0 0 8px rgba(255,255,255,0.7),
+    0 0 16px rgba(255,255,255,0.5);
+}
+
+/* Glow animation */
+@keyframes iconGlow {
+  0% {
+    text-shadow: 0 0 4px rgba(255,255,255,0.2);
+  }
+  50% {
+    text-shadow:
+      0 0 10px rgba(255,255,255,0.6),
+      0 0 18px rgba(255,255,255,0.4);
+  }
+  100% {
+    text-shadow: 0 0 4px rgba(255,255,255,0.2);
+  }
+}
+/* ================= SOCIAL ICONS (BIGGER + GLOW) ================= */
+
+.socials {
+  margin-top: 22px;
+  display: flex;
+  justify-content: center;
+  gap: 22px;            /* thoda zyada spacing */
+}
+
+.socials a {
+  font-size: 30px;      /* 🔥 SIZE INCREASE (22 → 30) */
+  color: var(--text);
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+/* Soft continuous glow */
+.socials a i {
+  animation: iconGlow 2.8s ease-in-out infinite;
+}
+
+/* Hover = aur bada + strong glow */
+.socials a:hover {
+  transform: scale(1.25);  /* 🔥 hover pe aur bada */
+}
+
+.socials a:hover i {
+  color: #ffffff;
+  animation-play-state: paused;
+  text-shadow:
+    0 0 10px rgba(255,255,255,0.8),
+    0 0 22px rgba(255,255,255,0.6);
+}
+
+/* Glow animation */
+@keyframes iconGlow {
+  0% {
+    text-shadow: 0 0 6px rgba(255,255,255,0.25);
+  }
+  50% {
+    text-shadow:
+      0 0 14px rgba(255,255,255,0.6),
+      0 0 26px rgba(255,255,255,0.45);
+  }
+  100% {
+    text-shadow: 0 0 6px rgba(255,255,255,0.25);
+  }
+}
+@media (max-width: 600px) {
+  .socials a {
+    font-size: 26px;
+  }
+}
+/* ================= VIEW COUNTER ================= */
+/* ================= VIEW COUNTERS (PREMIUM) ================= */
+.view-counter {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+}
+
+.view-counter span {
+  min-width: 110px;
+  text-align: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--card), rgba(255,255,255,0.08));
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  box-shadow: 0 0 0 rgba(255,255,255,0);
+  transition: transform 0.25s ease;
+}
+
+/* subtle glow pulse */
+.view-counter span {
+  animation: counterGlow 3s ease-in-out infinite;
+}
+
+@keyframes counterGlow {
+  0% {
+    box-shadow: 0 0 6px rgba(255,255,255,0.12);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(255,255,255,0.25);
+  }
+  100% {
+    box-shadow: 0 0 6px rgba(255,255,255,0.12);
+  }
+}
+/* ================= LOADER TEXT COLORS (FIXED) ================= */
+
+/* LIGHT MODE */
+body.light #loaderScreen {
+  background: #ffffff;
+}
+
+body.light .loader-box {
+  background: #f3f3f3;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+body.light .loader-title,
+body.light #typingText {
+  color: #000000;   /* 🔥 BLACK TEXT */
+}
+
+/* DARK MODE */
+body:not(.light) #loaderScreen {
+  background: #000000;
+}
+
+body:not(.light) .loader-box {
+  background: #111111;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+body:not(.light) .loader-title,
+body:not(.light) #typingText {
+  color: #ffffff;   /* 🔥 WHITE TEXT */
+}
