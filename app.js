@@ -15,11 +15,6 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
-/* ================= DOM ================= */
-const menuBtn = document.getElementById("menuBtn");
-const menu = document.getElementById("menu");
-const themeToggle = document.getElementById("themeToggle");
-
 /* ================= FIREBASE ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyCGnqFDBgUcBkl4TA2HYe8U-enFtuzpW8I",
@@ -31,6 +26,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+/* ================= DOM ================= */
+const menuBtn = document.getElementById("menuBtn");
+const menu = document.getElementById("menu");
+const themeToggle = document.getElementById("themeToggle");
 
 /* ================= UI ================= */
 menuBtn.onclick = () => menu.classList.toggle("show");
@@ -78,11 +78,7 @@ async function loadNav() {
     btn.innerText = n.label;
 
     btn.onclick = () => {
-      if (n.newTab) {
-        window.open(n.url, "_blank");
-      } else {
-        window.location.href = n.url;
-      }
+      n.newTab ? window.open(n.url, "_blank") : (window.location.href = n.url);
       menu.classList.remove("show");
     };
 
@@ -90,7 +86,7 @@ async function loadNav() {
   });
 }
 
-/* ================= POSTS ================= */
+/* ================= POSTS (🔥 FIRESTORE LIKES) ================= */
 async function loadPosts() {
   const feed = document.querySelector(".feed");
   feed.innerHTML = "";
@@ -112,18 +108,21 @@ async function loadPosts() {
     const p = docu.data();
     const id = docu.id;
 
-    const liked = localStorage.getItem(id + "_liked") === "true";
-    const count = Number(localStorage.getItem(id + "_count")) || 0;
+    const liked = localStorage.getItem("liked_" + id) === "true";
+    const count = Number(p.likeCount) || 0;
 
     const post = document.createElement("div");
     post.className = "post";
 
     post.innerHTML = `
       <div class="post-header"><strong>${p.name || "Mintu Jaat 👑"}</strong></div>
+
       <div class="post-image">
         <img src="${p.imageUrl}" alt="post">
       </div>
+
       <div class="post-caption">${p.caption}</div>
+
       <div class="post-actions">
         <button class="like ${liked ? "liked" : ""}">❤️</button>
         <span class="count">${count}</span>
@@ -134,12 +133,25 @@ async function loadPosts() {
     const likeBtn = post.querySelector(".like");
     const countEl = post.querySelector(".count");
 
-    likeBtn.onclick = () => {
-      if (localStorage.getItem(id + "_liked") === "true") return;
-      localStorage.setItem(id + "_liked", "true");
-      localStorage.setItem(id + "_count", count + 1);
-      countEl.innerText = count + 1;
+    likeBtn.onclick = async () => {
+      if (localStorage.getItem("liked_" + id)) return;
+
+      // Optimistic UI
+      localStorage.setItem("liked_" + id, "true");
       likeBtn.classList.add("liked");
+      countEl.innerText = Number(countEl.innerText) + 1;
+
+      try {
+        await updateDoc(doc(db, "posts", id), {
+          likeCount: increment(1)
+        });
+      } catch (e) {
+        // rollback
+        localStorage.removeItem("liked_" + id);
+        likeBtn.classList.remove("liked");
+        countEl.innerText = Number(countEl.innerText) - 1;
+        console.error("Like failed", e);
+      }
     };
 
     post.querySelector(".share").onclick = async () => {
@@ -158,56 +170,34 @@ async function handleViews() {
   const snap = await getDoc(ref);
 
   if (!snap.exists()) {
-    await setDoc(ref, {
-      total: 1,
-      today: 1,
-      lastDate: today
-    });
+    await setDoc(ref, { total: 1, today: 1, lastDate: today });
   } else {
-    const data = snap.data();
-    if (data.lastDate === today) {
-      await updateDoc(ref, {
-        total: increment(1),
-        today: increment(1)
-      });
+    const d = snap.data();
+    if (d.lastDate === today) {
+      await updateDoc(ref, { total: increment(1), today: increment(1) });
     } else {
-      await updateDoc(ref, {
-        total: increment(1),
-        today: 1,
-        lastDate: today
-      });
+      await updateDoc(ref, { total: increment(1), today: 1, lastDate: today });
     }
   }
 
-  loadViewCounts();
+  const s = await getDoc(ref);
+  document.getElementById("todayViews").innerText = "Today view: " + s.data().today;
+  document.getElementById("totalViews").innerText = "Total view: " + s.data().total;
 }
 
-async function loadViewCounts() {
-  const snap = await getDoc(doc(db, "siteStats", "views"));
-  if (!snap.exists()) return;
-
-  const d = snap.data();
-  document.getElementById("todayViews").innerText = "Today view: " + d.today;
-  document.getElementById("totalViews").innerText = "Total view: " + d.total;
-}
-
-/* ================= VISITOR TRACKING (IP + LOCATION) ================= */
+/* ================= VISITOR TRACKING ================= */
 async function saveVisitorInfo() {
   try {
-    // 🌍 IP + location API
     const res = await fetch("https://ipapi.co/json/");
-    const ipData = await res.json();
-
+    const ip = await res.json();
     const ua = navigator.userAgent;
 
-    const visitor = {
-      ip: ipData.ip || "Unknown",
-      country: ipData.country_name || "Unknown",
-      region: ipData.region || "Unknown",
-      city: ipData.city || "Unknown",
-
-      device: /Android|iPhone|iPad/i.test(ua) ? "Mobile" : "Desktop",
-      os: navigator.platform || "Unknown",
+    await addDoc(collection(db, "visitors"), {
+      ip: ip.ip || "Unknown",
+      country: ip.country_name || "",
+      region: ip.region || "",
+      city: ip.city || "",
+      device: /Android|iPhone/i.test(ua) ? "Mobile" : "Desktop",
       browser: ua.includes("Chrome")
         ? "Chrome"
         : ua.includes("Firefox")
@@ -215,67 +205,46 @@ async function saveVisitorInfo() {
         : ua.includes("Safari")
         ? "Safari"
         : "Unknown",
-
+      os: navigator.platform,
       screen: `${screen.width}x${screen.height}`,
       visitedAt: serverTimestamp()
-    };
-
-    await addDoc(collection(db, "visitors"), visitor);
+    });
   } catch (e) {
-    console.error("Visitor save failed:", e);
+    console.warn("Visitor tracking failed");
   }
 }
 
-
 /* ================= LOADER ================= */
 document.addEventListener("DOMContentLoaded", () => {
-  const loaderScreen = document.getElementById("loaderScreen");
-  const typingText = document.getElementById("typingText");
-  const loaderBox = document.querySelector(".loader-box");
+  const loader = document.getElementById("loaderScreen");
+  const text = document.getElementById("typingText");
+  const box = document.querySelector(".loader-box");
 
-  if (!loaderScreen || !typingText || !loaderBox) {
-    startApp();
-    return;
-  }
-
-  function typeText(text, speed = 65) {
-    return new Promise(resolve => {
-      let i = 0;
-      typingText.textContent = "";
-      const interval = setInterval(() => {
-        typingText.textContent += text[i++];
-        if (i >= text.length) {
-          clearInterval(interval);
-          resolve();
-        }
-      }, speed);
-    });
-  }
-
-  async function runLoader() {
-    await typeText("Mintu Jaat 👑", 85);
-    await new Promise(r => setTimeout(r, 150));
-    loaderBox.classList.add("exit");
-    await new Promise(r => setTimeout(r, 450));
-    loaderScreen.remove();
-  }
-
-  setTimeout(() => {
-    if (document.getElementById("loaderScreen")) {
-      document.getElementById("loaderScreen").remove();
+  async function type(t) {
+    for (let i = 0; i < t.length; i++) {
+      text.textContent += t[i];
+      await new Promise(r => setTimeout(r, 80));
     }
-  }, 2000);
+  }
 
-  runLoader();
+  if (loader && text && box) {
+    (async () => {
+      await type("Mintu Jaat 👑");
+      await new Promise(r => setTimeout(r, 200));
+      box.classList.add("exit");
+      setTimeout(() => loader.remove(), 450);
+    })();
+  }
+
   startApp();
 });
 
-/* ================= APP START ================= */
+/* ================= START ================= */
 function startApp() {
   loadProfile();
   loadSocials();
   loadNav();
   loadPosts();
   handleViews();
-  saveVisitorInfo(); // 🔥 VISITOR NOW SAVED
+  saveVisitorInfo();
 }
