@@ -444,3 +444,65 @@ falcon-icon[src="https://i.ibb.co/gk3CkkV/IMG-20250918-195117-391.webp"] {
 .post {
   margin-top: 6px;   /* multiple posts ke beech smooth gap */
 }
+/* Like button default */
+.post-actions .like {
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+/* Liked state */
+.post-actions .like.liked {
+  color: #e50914;              /* strong red */
+  transform: scale(1.25);     /* pop effect */
+}
+
+/* Optional pulse */
+.post-actions .like.liked::after {
+  content: "";
+  position: absolute;
+}
+.post-actions .count {
+  font-weight: 600;
+  min-width: 20px;
+  display: inline-block;
+}
+.post-header {
+  text-align: center;          /* 🔥 center */
+  padding: 14px 16px 10px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.post-header strong {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    rgba(255,255,255,0.12),
+    rgba(255,255,255,0.04)
+  );
+  color: var(--text);
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}
+body.light .post-header strong {
+  background: linear-gradient(
+    135deg,
+    rgba(0,0,0,0.08),
+    rgba(0,0,0,0.03)
+  );
+  color: #000;
+}
+.post-image {
+  margin-top: 6px;
+}
+.post-actions .like {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.85;
+  transition: all 0.15s ease;
+}
+
+.post-actions .like.liked {
+  color: #e50914;       /* red */
+  opacity: 1;
+}
