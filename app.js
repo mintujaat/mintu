@@ -129,30 +129,38 @@ async function loadPosts() {
         <button class="share">🔗</button>
       </div>
     `;
+const likeBtn = post.querySelector(".like");
+const countEl = post.querySelector(".count");
 
-    const likeBtn = post.querySelector(".like");
-    const countEl = post.querySelector(".count");
+// initial state (reload ke baad)
+if (liked) {
+  likeBtn.classList.add("liked");
+  likeBtn.innerText = "❤️ Liked";
+}
 
-    likeBtn.onclick = async () => {
-      if (localStorage.getItem("liked_" + id)) return;
+likeBtn.onclick = async () => {
+  if (localStorage.getItem("liked_" + id)) return;
 
-      // Optimistic UI
-      localStorage.setItem("liked_" + id, "true");
-      likeBtn.classList.add("liked");
-      countEl.innerText = Number(countEl.innerText) + 1;
+  // UI update
+  localStorage.setItem("liked_" + id, "true");
+  likeBtn.classList.add("liked");
+  likeBtn.innerText = "❤️ Liked";
+  countEl.innerText = Number(countEl.innerText) + 1;
 
-      try {
-        await updateDoc(doc(db, "posts", id), {
-          likeCount: increment(1)
-        });
-      } catch (e) {
-        // rollback
-        localStorage.removeItem("liked_" + id);
-        likeBtn.classList.remove("liked");
-        countEl.innerText = Number(countEl.innerText) - 1;
-        console.error("Like failed", e);
-      }
-    };
+  try {
+    await updateDoc(doc(db, "posts", id), {
+      likeCount: increment(1)
+    });
+  } catch (e) {
+    // rollback
+    localStorage.removeItem("liked_" + id);
+    likeBtn.classList.remove("liked");
+    likeBtn.innerText = "❤️ Like";
+    countEl.innerText = Number(countEl.innerText) - 1;
+    console.error("Like failed", e);
+  }
+};
+
 
     post.querySelector(".share").onclick = async () => {
       await navigator.clipboard.writeText(location.href + "#" + id);
@@ -238,6 +246,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
   startApp();
 });
+likeBtn.onclick = async () => {
+  if (localStorage.getItem("liked_" + id)) return;
+
+  localStorage.setItem("liked_" + id, "true");
+
+  likeBtn.classList.add("liked");   // 🔥 THIS LINE IS MUST
+  countEl.innerText = Number(countEl.innerText) + 1;
+
+  try {
+    await updateDoc(doc(db, "posts", id), {
+      likeCount: increment(1)
+    });
+  } catch {
+    likeBtn.classList.remove("liked");
+    countEl.innerText = Number(countEl.innerText) - 1;
+    localStorage.removeItem("liked_" + id);
+  }
+};
 
 /* ================= START ================= */
 function startApp() {
