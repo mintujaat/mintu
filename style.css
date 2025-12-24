@@ -506,3 +506,52 @@ body.light .post-header strong {
   color: #e50914;       /* red */
   opacity: 1;
 }
+#loaderScreen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.4s ease;
+}
+#loaderScreen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.4s ease;
+}
+
+.loader-box {
+  text-align: center;
+  color: #aaa;
+}
+
+.loader-title {
+  letter-spacing: 3px;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+#typingText {
+  font-size: 28px;
+  font-family: monospace;
+  color: #fff;
+}#loaderScreen {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  transition: opacity 0.4s ease;
+}
+.loader-box {
+  text-align: center;
+  color: #aaa;
+}
