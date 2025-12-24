@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Domain Verification</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;font-family:system-ui,sans-serif}
+body{
+  margin:0;min-height:100vh;
+  background:radial-gradient(circle at top,#0b0b0b,#000);
+  color:#fff;display:flex;justify-content:center;align-items:center
+}
+.app{width:100%;max-width:480px;padding:20px}
+.box{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:18px;
+  padding:20px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+h2{margin:0 0 14px}
+input{
+  width:100%;padding:12px;border-radius:10px;
+  border:1px solid #222;background:#0d0d0d;
+  color:#fff;margin-bottom:12px
+}
+button{
+  width:100%;padding:12px;border-radius:10px;
+  border:none;font-weight:800;cursor:pointer;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#000
+}
+.result{
+  margin-top:14px;
+  font-size:20px;
+  font-weight:900;
+  min-height:34px;
+}
+.not{color:#ef4444}
+
+/* VERIFIED EFFECTS */
+.badge{
+  margin-top:10px;
+  display:inline-block;
+  padding:10px 24px;
+  border-radius:999px;
+  background:linear-gradient(135deg,#22c55e,#4ade80);
+  color:#000;
+  font-weight:900;
+  letter-spacing:1px;
+  box-shadow:0 0 30px rgba(34,197,94,.7);
+  animation:pulse 1.4s infinite;
+}
+@keyframes pulse{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.1)}
+  100%{transform:scale(1)}
+}
+.spark{
+  position:absolute;
+  width:6px;height:6px;
+  background:#22c55e;
+  border-radius:50%;
+  animation:float 3s linear infinite;
+}
+@keyframes float{
+  from{transform:translateY(60px);opacity:0}
+  to{transform:translateY(-140px);opacity:1}
+}
+</style>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+/* FIREBASE */
+const firebaseConfig = {
+  apiKey: "AIzaSyCGnqFDBgUcBkl4TA2HYe8U-enFtuzpW8I",
+  authDomain: "mintuuu.firebaseapp.com",
+  projectId: "mintuuu",
+  messagingSenderId: "795208515782",
+  appId: "1:795208515782:web:b6649939729ceb669197c7"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* DOM */
+const input = document.getElementById("domain");
+const btn = document.getElementById("check");
+const result = document.getElementById("result");
+const box = document.getElementById("box");
+
+const normalize = d =>
+  d.toLowerCase().replace(/^https?:\/\//,"")
+   .replace(/^www\./,"").replace(/\/$/,"");
+
+btn.onclick = async ()=>{
+  result.textContent="";
+  box.querySelectorAll(".spark").forEach(s=>s.remove());
+
+  const val = normalize(input.value.trim());
+  if(!val) return;
+
+  const snap = await getDocs(
+    query(collection(db,"verifiedDomains"), where("domain","==",val))
+  );
+
+  if(!snap.empty){
+    result.innerHTML = "VERIFIED <div class='badge'>✔ TRUSTED</div>";
+    for(let i=0;i<16;i++){
+      const s=document.createElement("div");
+      s.className="spark";
+      s.style.left=Math.random()*100+"%";
+      s.style.animationDelay=Math.random()*2+"s";
+      box.appendChild(s);
+    }
+  }else{
+    result.textContent="NOT VERIFIED";
+    result.className="result not";
+  }
+};
+</script>
+</head>
+
+<body>
+<div class="app">
+  <div class="box" id="box">
+    <h2>Verify Your Domain</h2>
+    <input id="domain" placeholder="example.com or https://example.com">
+    <button id="check">Verify</button>
+    <div id="result" class="result"></div>
+  </div>
+</div>
+</body>
+</html>

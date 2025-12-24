@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Support Ticket</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+*{box-sizing:border-box;font-family:system-ui,sans-serif}
+body{
+  margin:0;min-height:100vh;
+  background:linear-gradient(180deg,#0a0a0a,#000);
+  color:#fff;display:flex;justify-content:center;align-items:center
+}
+.app{width:100%;max-width:420px;padding:20px}
+.about{text-align:center;margin-bottom:20px}
+.about h1{margin:0;font-size:26px}
+.about p{font-size:14px;color:#aaa}
+.box{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:16px
+}
+input,textarea{
+  width:100%;background:#0d0d0d;border:1px solid #222;
+  color:#fff;padding:10px;border-radius:8px;margin-bottom:10px
+}
+textarea{resize:none;height:90px}
+button{
+  width:100%;background:linear-gradient(135deg,#22c55e,#16a34a);
+  border:none;color:#000;padding:11px;font-weight:600;
+  border-radius:8px;cursor:pointer
+}
+#msg{font-size:13px;margin-top:8px;text-align:center;color:#7dd3fc}
+.chat{margin-top:18px;display:none}
+.messages{max-height:240px;overflow-y:auto;margin-bottom:8px}
+.message{
+  padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:13px
+}
+.user{background:#22c55e;color:#000}
+.admin{background:#1f2937}
+.send{display:flex;gap:6px}
+.send input{flex:1}
+.send button{width:auto;padding:0 14px}
+.hidden{display:none}
+</style>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+  Timestamp,
+  query,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+/* ================= FIREBASE ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCGnqFDBgUcBkl4TA2HYe8U-enFtuzpW8I",
+  authDomain: "mintuuu.firebaseapp.com",
+  projectId: "mintuuu",
+  messagingSenderId: "795208515782",
+  appId: "1:795208515782:web:b6649939729ceb669197c7"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+/* ================= DOM ================= */
+const nameEl = document.getElementById("name");
+const problemEl = document.getElementById("problem");
+const submitBtn = document.getElementById("submit");
+const msgEl = document.getElementById("msg");
+const chatBox = document.getElementById("chat");
+const messagesEl = document.getElementById("messages");
+const replyInput = document.getElementById("reply");
+const sendBtn = document.getElementById("send");
+const formBox = document.getElementById("ticketForm");
+
+/* ================= STATE ================= */
+const LS_KEY = "support_ticket_id";
+let ticketId = localStorage.getItem(LS_KEY);
+
+/* ================= RESTORE ================= */
+if (ticketId) {
+  formBox.classList.add("hidden");
+  chatBox.style.display = "block";
+  msgEl.innerText = "Restored your ticket.";
+  listenMessages(ticketId);
+  listenTicketStatus(ticketId);
+}
+
+/* ================= CREATE TICKET ================= */
+submitBtn.onclick = async () => {
+  const name = nameEl.value.trim();
+  const problem = problemEl.value.trim();
+  if (!name || !problem) {
+    msgEl.innerText = "Fill all fields";
+    return;
+  }
+
+  submitBtn.disabled = true;
+  msgEl.innerText = "Creating ticket...";
+
+  const now = Timestamp.now();
+  const autoCloseAt = Timestamp.fromMillis(
+    now.toMillis() + 30 * 60 * 1000
+  );
+
+  const ticketRef = await addDoc(collection(db, "tickets"), {
+    name,
+    status: "open",
+    createdAt: serverTimestamp(),
+    autoCloseAt
+  });
+
+  ticketId = ticketRef.id;
+  localStorage.setItem(LS_KEY, ticketId);
+
+  await addDoc(
+    collection(db, "tickets", ticketId, "messages"),
+    {
+      from: "user",
+      text: problem,
+      createdAt: serverTimestamp()
+    }
+  );
+
+  formBox.classList.add("hidden");
+  chatBox.style.display = "block";
+  msgEl.innerText = "Ticket created. Conversation opened.";
+
+  listenMessages(ticketId);
+  listenTicketStatus(ticketId);
+};
+
+/* ================= MESSAGE LISTENER (ORDERED) ================= */
+function listenMessages(id) {
+  onSnapshot(
+    query(
+      collection(db, "tickets", id, "messages"),
+      orderBy("createdAt", "asc")   // ✅ STRICT SEQUENCE
+    ),
+    snap => {
+      messagesEl.innerHTML = "";
+      snap.forEach(d => {
+        const m = d.data();
+        const div = document.createElement("div");
+        div.className = "message " + m.from;
+        div.innerText = m.text;
+        messagesEl.appendChild(div);
+      });
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+  );
+}
+
+/* ================= TICKET STATUS LISTENER ================= */
+function listenTicketStatus(id) {
+  onSnapshot(doc(db, "tickets", id), snap => {
+    if (!snap.exists()) {
+      // ❌ Admin deleted ticket
+      localStorage.removeItem(LS_KEY);
+      alert("Your ticket was deleted by admin.");
+      location.reload();
+      return;
+    }
+
+    const t = snap.data();
+
+    if (t.status === "closed") {
+      replyInput.disabled = true;
+      sendBtn.disabled = true;
+      replyInput.placeholder = "Ticket closed by admin";
+      msgEl.innerText = "Ticket closed.";
+    }
+  });
+}
+
+/* ================= SEND MESSAGE ================= */
+sendBtn.onclick = async () => {
+  const text = replyInput.value.trim();
+  if (!text || !ticketId) return;
+
+  await addDoc(
+    collection(db, "tickets", ticketId, "messages"),
+    {
+      from: "user",
+      text,
+      createdAt: serverTimestamp()
+    }
+  );
+
+  replyInput.value = "";
+};
+</script>
+</head>
+
+<body>
+<div class="app">
+
+  <div class="about">
+    <h1>Mintu</h1>
+    <p>
+      I am an IT developer focused on clean and professional systems.
+      This support desk handles real issues in real time.
+    </p>
+  </div>
+
+  <div class="box">
+
+    <!-- TICKET FORM -->
+    <div id="ticketForm">
+      <h3>Raise Support Ticket</h3>
+      <input id="name" placeholder="Your Name">
+      <textarea id="problem" placeholder="Describe your problem"></textarea>
+      <button id="submit">Submit Ticket</button>
+    </div>
+
+    <div id="msg"></div>
+
+    <!-- CHAT -->
+    <div class="chat" id="chat">
+      <h4>Conversation</h4>
+      <div class="messages" id="messages"></div>
+      <div class="send">
+        <input id="reply" placeholder="Type message">
+        <button id="send">Send</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>
