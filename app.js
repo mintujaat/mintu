@@ -27,68 +27,108 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-/* ================= DOM ================= */
-const menuBtn = document.getElementById("menuBtn");
-const menu = document.getElementById("menu");
-const themeToggle = document.getElementById("themeToggle");
+/* ================= SAFE HELPERS ================= */
+const $ = id => document.getElementById(id);
+const exists = el => el !== null && el !== undefined;
 
 /* ================= UI ================= */
-menuBtn.onclick = () => menu.classList.toggle("show");
-themeToggle.onclick = () => document.body.classList.toggle("light");
+const menuBtn = $("menuBtn");
+const menu = $("menu");
+const themeToggle = $("themeToggle");
+
+if (exists(menuBtn) && exists(menu)) {
+  menuBtn.onclick = () => menu.classList.toggle("show");
+}
+
+if (exists(themeToggle)) {
+  themeToggle.onclick = () => document.body.classList.toggle("light");
+}
 
 /* ================= PROFILE ================= */
 async function loadProfile() {
-  const snap = await getDoc(doc(db, "profile", "main"));
-  if (!snap.exists()) return;
-  const d = snap.data();
+  try {
+    const snap = await getDoc(doc(db, "profile", "main"));
+    if (!snap.exists()) return;
 
-  document.querySelector(".avatar").src = d.profilePic;
-  document.querySelector("h1").innerText = d.name;
-  document.querySelector(".subtitle").innerText = d.subtitle;
+    const d = snap.data();
+    const avatar = document.querySelector(".avatar");
+    const name = document.querySelector("h1");
+    const subtitle = document.querySelector(".subtitle");
+
+    if (avatar) avatar.src = d.profilePic || "";
+    if (name) name.innerText = d.name || "";
+    if (subtitle) subtitle.innerText = d.subtitle || "";
+  } catch (e) {
+    console.warn("Profile load failed");
+  }
 }
 
 /* ================= SOCIALS ================= */
 async function loadSocials() {
-  const box = document.querySelector(".socials");
-  box.innerHTML = "";
+  try {
+    const box = document.querySelector(".socials");
+    if (!box) return;
+    box.innerHTML = "";
 
-  const snap = await getDocs(collection(db, "socials"));
-  snap.forEach(docu => {
-    const s = docu.data();
-    if (!s.enabled) return;
+    const snap = await getDocs(collection(db, "socials"));
+    snap.forEach(snapDoc => {
+      const s = snapDoc.data();
+      if (!s.enabled) return;
 
-    const a = document.createElement("a");
-    a.href = s.url;
-    a.target = "_blank";
-    a.innerHTML = `<i class="fa-brands ${s.icon}"></i>`;
-    box.appendChild(a);
-  });
+      const a = document.createElement("a");
+      a.href = s.url;
+      a.target = "_blank";
+      a.innerHTML = `<i class="fa-brands ${s.icon}"></i>`;
+      box.appendChild(a);
+    });
+  } catch {
+    console.warn("Socials load failed");
+  }
 }
 
-/* ================= NAVIGATION ================= */
+/* ================= NAVIGATION (ADMIN ORDER SAFE) ================= */
 async function loadNav() {
+  if (!menu) return;
   menu.innerHTML = "";
-  const snap = await getDocs(collection(db, "navigation"));
 
-  snap.forEach(docu => {
-    const n = docu.data();
-    if (!n.enabled) return;
+  try {
+    const snap = await getDocs(collection(db, "navigation"));
+    const items = [];
 
-    const btn = document.createElement("button");
-    btn.innerText = n.label;
+    snap.forEach(d => {
+      const n = d.data();
+      if (!n.enabled) return;
 
-    btn.onclick = () => {
-      n.newTab ? window.open(n.url, "_blank") : (window.location.href = n.url);
-      menu.classList.remove("show");
-    };
+      items.push({
+        label: n.label,
+        url: n.url,
+        newTab: !!n.newTab,
+        order: typeof n.order === "number" ? n.order : 999
+      });
+    });
 
-    menu.appendChild(btn);
-  });
+    items.sort((a, b) => a.order - b.order);
+
+    items.forEach(n => {
+      const btn = document.createElement("button");
+      btn.textContent = n.label;
+
+      btn.onclick = () => {
+        n.newTab ? window.open(n.url, "_blank") : (window.location.href = n.url);
+        menu.classList.remove("show");
+      };
+
+      menu.appendChild(btn);
+    });
+  } catch (e) {
+    console.warn("Navigation load failed");
+  }
 }
 
-/* ================= POSTS (🔥 FIRESTORE LIKES) ================= */
+/* ================= POSTS (LIKES SAFE) ================= */
 async function loadPosts() {
   const feed = document.querySelector(".feed");
+  if (!feed) return;
   feed.innerHTML = "";
 
   let snap;
@@ -116,51 +156,39 @@ async function loadPosts() {
 
     post.innerHTML = `
       <div class="post-header"><strong>${p.name || "Mintu Jaat 👑"}</strong></div>
-
       <div class="post-image">
-        <img src="${p.imageUrl}" alt="post">
+        <img src="${p.imageUrl || ""}">
       </div>
-
-      <div class="post-caption">${p.caption}</div>
-
+      <div class="post-caption">${p.caption || ""}</div>
       <div class="post-actions">
-        <button class="like ${liked ? "liked" : ""}">❤️</button>
+        <button class="like ${liked ? "liked" : ""}">❤️ ${liked ? "Liked" : "Like"}</button>
         <span class="count">${count}</span>
         <button class="share">🔗</button>
       </div>
     `;
-const likeBtn = post.querySelector(".like");
-const countEl = post.querySelector(".count");
 
-// initial state (reload ke baad)
-if (liked) {
-  likeBtn.classList.add("liked");
-  likeBtn.innerText = "❤️ Liked";
-}
+    const likeBtn = post.querySelector(".like");
+    const countEl = post.querySelector(".count");
 
-likeBtn.onclick = async () => {
-  if (localStorage.getItem("liked_" + id)) return;
+    likeBtn.onclick = async () => {
+      if (localStorage.getItem("liked_" + id)) return;
 
-  // UI update
-  localStorage.setItem("liked_" + id, "true");
-  likeBtn.classList.add("liked");
-  likeBtn.innerText = "❤️ Liked";
-  countEl.innerText = Number(countEl.innerText) + 1;
+      localStorage.setItem("liked_" + id, "true");
+      likeBtn.classList.add("liked");
+      likeBtn.innerText = "❤️ Liked";
+      countEl.innerText = Number(countEl.innerText) + 1;
 
-  try {
-    await updateDoc(doc(db, "posts", id), {
-      likeCount: increment(1)
-    });
-  } catch (e) {
-    // rollback
-    localStorage.removeItem("liked_" + id);
-    likeBtn.classList.remove("liked");
-    likeBtn.innerText = "❤️ Like";
-    countEl.innerText = Number(countEl.innerText) - 1;
-    console.error("Like failed", e);
-  }
-};
-
+      try {
+        await updateDoc(doc(db, "posts", id), {
+          likeCount: increment(1)
+        });
+      } catch {
+        localStorage.removeItem("liked_" + id);
+        likeBtn.classList.remove("liked");
+        likeBtn.innerText = "❤️ Like";
+        countEl.innerText = Number(countEl.innerText) - 1;
+      }
+    };
 
     post.querySelector(".share").onclick = async () => {
       await navigator.clipboard.writeText(location.href + "#" + id);
@@ -171,26 +199,33 @@ likeBtn.onclick = async () => {
   });
 }
 
-/* ================= VIEW COUNTER ================= */
+/* ================= VIEW COUNTER (SAFE) ================= */
 async function handleViews() {
-  const today = new Date().toISOString().slice(0, 10);
-  const ref = doc(db, "siteStats", "views");
-  const snap = await getDoc(ref);
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const ref = doc(db, "siteStats", "views");
+    const snap = await getDoc(ref);
 
-  if (!snap.exists()) {
-    await setDoc(ref, { total: 1, today: 1, lastDate: today });
-  } else {
-    const d = snap.data();
-    if (d.lastDate === today) {
-      await updateDoc(ref, { total: increment(1), today: increment(1) });
+    if (!snap.exists()) {
+      await setDoc(ref, { total: 1, today: 1, lastDate: today });
     } else {
-      await updateDoc(ref, { total: increment(1), today: 1, lastDate: today });
+      const d = snap.data();
+      if (d.lastDate === today) {
+        await updateDoc(ref, { total: increment(1), today: increment(1) });
+      } else {
+        await updateDoc(ref, { total: increment(1), today: 1, lastDate: today });
+      }
     }
-  }
 
-  const s = await getDoc(ref);
-  document.getElementById("todayViews").innerText = "Today view: " + s.data().today;
-  document.getElementById("totalViews").innerText = "Total view: " + s.data().total;
+    const s = await getDoc(ref);
+    const tv = $("todayViews");
+    const av = $("totalViews");
+
+    if (exists(tv)) tv.innerText = "Today view: " + s.data().today;
+    if (exists(av)) av.innerText = "Total view: " + s.data().total;
+  } catch {
+    console.warn("View counter failed");
+  }
 }
 
 /* ================= VISITOR TRACKING ================= */
@@ -217,60 +252,54 @@ async function saveVisitorInfo() {
       screen: `${screen.width}x${screen.height}`,
       visitedAt: serverTimestamp()
     });
-  } catch (e) {
-    console.warn("Visitor tracking failed");
-  }
+  } catch {}
 }
 
-/* ================= LOADER ================= */
-document.addEventListener("DOMContentLoaded", () => {
-  const loader = document.getElementById("loaderScreen");
-  const text = document.getElementById("typingText");
-  const box = document.querySelector(".loader-box");
-
-  async function type(t) {
-    for (let i = 0; i < t.length; i++) {
-      text.textContent += t[i];
-      await new Promise(r => setTimeout(r, 80));
-    }
-  }
-
-  if (loader && text && box) {
-    (async () => {
-      await type("Mintu Jaat 👑");
-      await new Promise(r => setTimeout(r, 200));
-      box.classList.add("exit");
-      setTimeout(() => loader.remove(), 450);
-    })();
-  }
-
-  startApp();
-});
-likeBtn.onclick = async () => {
-  if (localStorage.getItem("liked_" + id)) return;
-
-  localStorage.setItem("liked_" + id, "true");
-
-  likeBtn.classList.add("liked");   // 🔥 THIS LINE IS MUST
-  countEl.innerText = Number(countEl.innerText) + 1;
-
-  try {
-    await updateDoc(doc(db, "posts", id), {
-      likeCount: increment(1)
-    });
-  } catch {
-    likeBtn.classList.remove("liked");
-    countEl.innerText = Number(countEl.innerText) - 1;
-    localStorage.removeItem("liked_" + id);
-  }
-};
-
 /* ================= START ================= */
-function startApp() {
+document.addEventListener("DOMContentLoaded", () => {
   loadProfile();
   loadSocials();
   loadNav();
   loadPosts();
   handleViews();
   saveVisitorInfo();
-}
+});
+
+/* ================= LOADER + TYPING (EXACT FINISH BASED) ================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+  const loader = document.getElementById("loaderScreen");
+  const textEl = document.getElementById("typingText");
+
+  if (!loader || !textEl) return;
+
+  const text = "Mintu Jaat 👑";
+  const speed = 80; // typing speed (ms)
+  let i = 0;
+
+  function typeNext() {
+    if (i < text.length) {
+      textEl.textContent += text.charAt(i);
+      i++;
+      setTimeout(typeNext, speed);
+    } else {
+      // ✅ typing FINISHED — now hide loader
+      setTimeout(hideLoader, 500); // small pause after full name
+    }
+  }
+
+  function hideLoader() {
+    loader.style.opacity = "0";
+    loader.style.pointerEvents = "none";
+
+    setTimeout(() => {
+      loader.remove();
+    }, 400);
+  }
+
+  // reset text (safety)
+  textEl.textContent = "";
+
+  // start typing
+  typeNext();
+});
