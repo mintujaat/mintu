@@ -1,30 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Mintu – Profile</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Mintu – Profile</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- CSS -->
-<link rel="stylesheet" href="style.css">
+  <!-- FAVICON -->
+  <link rel="icon" type="image/webp"
+        href="https://i.ibb.co/gk3CkkV/IMG-20250918-195117-391.webp">
 
-<!-- Icons -->
-<link rel="stylesheet"
- href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
 
-<!-- IMPORTANT: MODULE SCRIPT -->
-<script type="module" src="app.js"></script>
-<script>
-if (localStorage.getItem("verified") !== "true") {
-  window.location.href = "verify.html";
-}
-</script>
+  <!-- Icons -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+  <!-- VERIFY FIRST (BLOCK APP IF NOT VERIFIED) -->
+  <script>
+    if (localStorage.getItem("verified") !== "true") {
+      window.location.href = "verify.html";
+    }
+  </script>
+
+  <!-- APP SCRIPT -->
+  <script type="module" src="app.js" defer></script>
 </head>
 
-<body class="light">
+<body class="dark">
 
-<body class="light">
+<!-- OVERLAY -->
+<div class="overlay" id="overlay"></div>
+
 <!-- LOADER -->
 <div id="loaderScreen">
   <div class="loader-box">
@@ -33,17 +40,14 @@ if (localStorage.getItem("verified") !== "true") {
   </div>
 </div>
 
-
-<!-- rest of site -->
-
-<!-- THEME TOGGLE (LEFT) -->
+<!-- THEME TOGGLE -->
 <div class="top-left">
   <button id="themeToggle" aria-label="Toggle theme">
     <i class="fa-solid fa-moon"></i>
   </button>
 </div>
 
-<!-- MENU BUTTON (RIGHT) -->
+<!-- MENU BUTTON -->
 <div class="top-right">
   <button id="menuBtn" class="hamburger" aria-label="Menu">
     <span></span>
@@ -53,39 +57,33 @@ if (localStorage.getItem("verified") !== "true") {
 </div>
 
 <!-- HAMBURGER MENU -->
-<nav id="menu" class="menu">
-  <!-- buttons Firebase se inject honge -->
-</nav>
+<nav id="menu" class="menu"></nav>
 
 <main>
 
-<!-- ================= ABOUT / HOME ================= -->
+<!-- ================= ABOUT ================= -->
 <section id="about" class="section active">
 
-  <!-- PROFILE -->
   <div class="profile center">
     <img class="avatar"
-         src="https://i.ibb.co/gk3CkkV/IMG-20250918-195117-391.webprfy"
+         src="https://i.ibb.co/gk3CkkV/IMG-20250918-195117-391.webp"
          alt="Profile">
 
     <h1>Mintu</h1>
     <p class="subtitle">IT • Developer</p>
 
-    <!-- SOCIAL ICONS (Firebase) -->
-    <div class="socials">
-      <!-- icons Firebase se inject honge -->
-    </div>
+    <!-- SOCIALS -->
+    <div class="socials"></div>
   </div>
-<!-- VIEW COUNTERS -->
-<div class="view-counter">
-  <span id="todayViews">Today view : 0</span>
-  <span id="totalViews">Total view: 0</span>
-</div>
 
-  <!-- ================= FEED ================= -->
-  <section class="feed">
-    <!-- posts Firebase se inject honge -->
-  </section>
+  <!-- VIEW COUNTERS -->
+  <div class="view-counter">
+    <span id="todayViews">Today view: 0</span>
+    <span id="totalViews">Total view: 0</span>
+  </div>
+
+  <!-- FEED -->
+  <section class="feed"></section>
 
 </section>
 
